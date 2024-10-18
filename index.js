@@ -56,7 +56,7 @@ app.get('/server/:id', (req, res) => {
     console.log(server);
 
     if (server) {
-        res.json({ playerCount: server.players.length });
+        res.json({ playerCount: Object.keys(server.players).length });
     } else {
         res.status(404).json({ error: 'Server not found' });
     }
