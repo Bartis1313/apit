@@ -54,9 +54,7 @@ app.get('/server/:id', (req, res) => {
     const server = serverDataCache[serverId];
 
     if (server) {
-        const playerCount = server.players.length;
-
-        res.json({ playerCount: playerCount });
+        res.json({ playerCount: server.players.length });
     } else {
         res.status(404).json({ error: 'Server not found' });
     }
