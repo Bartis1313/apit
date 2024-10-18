@@ -3,6 +3,8 @@ const axios = require('axios');
 const bodyParser = require('body-parser');
 
 const SERVER_PORT = 4500;
+const DATA_URL = 'https://zloemu.net/servers/bf4?json';
+const CACHE_INTERVAL = 2 * 60 * 1000;
 
 const app = express();
 
@@ -15,7 +17,7 @@ app.post('/webhook', async (req, res) => {
     try {
         const webhookData = JSON.parse(webhookString);
         await axios.post(webhookUrl, webhookData);
-        
+
         res.status(200).send('Webhook relayed successfully');
     } catch (error) {
         console.error('Error relaying webhook:', error.message);
@@ -30,6 +32,33 @@ app.post('/webhook', async (req, res) => {
             console.error('Error in setup:', error.message);
             res.status(500).send('Failed to relay webhook: ' + error.message);
         }
+    }
+});
+
+let serverDataCache = {};
+
+const fetchAndCacheData = async () => {
+    try {
+        const response = await axios.get(DATA_URL);
+        serverDataCache = response.data;
+    } catch (error) {
+        console.error('Error fetching data:', error.message);
+    }
+};
+
+setInterval(fetchAndCacheData, CACHE_INTERVAL);
+fetchAndCacheData();
+
+app.get('/server/:id', (req, res) => {
+    const serverId = req.params.id;
+    const server = serverDataCache[serverId];
+
+    if (server) {
+        const playerCount = server.players.length;
+
+        res.json({ serverName: server.GNAM, playerCount: playerCount });
+    } else {
+        res.status(404).json({ error: 'Server not found' });
     }
 });
 
