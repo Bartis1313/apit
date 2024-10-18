@@ -53,6 +53,8 @@ app.get('/server/:id', (req, res) => {
     const serverId = req.params.id;
     const server = serverDataCache[serverId];
 
+    console.log(server);
+
     if (server) {
         res.json({ playerCount: server.players.length });
     } else {
